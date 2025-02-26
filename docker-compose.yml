@@ -19,8 +19,6 @@ services:
   phase4:
     build:
       context: .
-      args:
-        - JAR_FILE=target/*.jar
     container_name: phase4
     restart: unless-stopped
     volumes:
