@@ -50,7 +50,7 @@ services:
     labels:
       - "traefik.enable=true"
       # HTTP
-      - "traefik.http.routers.phoss-smp-europa-http.rule=HostRegexp(`{subdomain:[a-z0-9-]+}.europa.eu`)"
+      - "traefik.http.routers.phoss-smp-europa-http.rule=HostRegexp(`{subdomain:.*}.europa.eu`)"
       - "traefik.http.routers.phoss-smp-europa-http.entrypoints=web"
       - "traefik.http.routers.phoss-smp-europa-http.service=phoss-smp"
       - "traefik.http.routers.phoss-smp-http.rule=Host(`smp.net.recommand.com`)"
