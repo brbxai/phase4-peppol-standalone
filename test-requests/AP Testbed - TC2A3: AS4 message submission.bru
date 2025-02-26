@@ -1,17 +1,17 @@
 meta {
-  name: AP Testbed - TC2A.3: AS4 message submission
+  name: AP Testbed - TC2A3: AS4 message submission
   type: http
   seq: 2
 }
 
 post {
-  url: http://localhost:8080/sendsbdh
+  url: https://ap.net.recommand.com/sendsbdh
   body: xml
   auth: none
 }
 
 headers {
-  X-Token: NjIh9tIx3Rgzme19mGIy
+  X-Token: 
 }
 
 body:xml {
@@ -28,9 +28,9 @@ body:xml {
         <DocumentIdentification>
            <Standard>urn:oasis:names:specification:ubl:schema:xsd:Invoice-2</Standard>
            <TypeVersion>2.1</TypeVersion>
-           <InstanceIdentifier>PBE000769-3-20250215T190405</InstanceIdentifier>
+           <InstanceIdentifier>PBE000769-20-20250226T203501</InstanceIdentifier>
            <Type>Invoice</Type>
-           <CreationDateAndTime>2025-02-15T19:04:14.897Z</CreationDateAndTime>
+           <CreationDateAndTime>2025-02-26T20:35:17.929Z</CreationDateAndTime>
         </DocumentIdentification>
         <BusinessScope>
            <Scope>
@@ -55,13 +55,13 @@ body:xml {
                   xmlns:ns4="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2">
         <CustomizationID>urn:cen.eu:en16931:2017#compliant#urn:fdc:peppol.eu:2017:poacc:billing:3.0</CustomizationID>
         <ProfileID>urn:fdc:peppol.eu:2017:poacc:billing:01:1.0</ProfileID>
-        <ID>PBE000769-3-20250215T190405</ID>
-        <IssueDate>2025-02-15</IssueDate>
-        <DueDate>2025-03-17</DueDate>
+        <ID>PBE000769-20-20250226T203501</ID>
+        <IssueDate>2025-02-26</IssueDate>
+        <DueDate>2025-03-28</DueDate>
         <InvoiceTypeCode>380</InvoiceTypeCode>
         <DocumentCurrencyCode>EUR</DocumentCurrencyCode>
         <AccountingCost>ACC:COST:232</AccountingCost>
-        <BuyerReference>4502137708</BuyerReference>
+        <BuyerReference>6567886552</BuyerReference>
         <ns3:AccountingSupplierParty>
            <ns3:Party>
               <EndpointID schemeID="9925">BE0659689080</EndpointID>
