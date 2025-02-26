@@ -29,6 +29,11 @@ public class Phase4PeppolStandaloneApplication
 {
   public static void main (final String [] args)
   {
+    // Set default config location if not set
+    if (System.getProperty("spring.config.location") == null) {
+      System.setProperty("spring.config.location", "file:/config/application.properties");
+    }
+    
     // Log the application.properties file location
     System.out.println("Loading application.properties from: " + System.getProperty("spring.config.location"));
     // Log the current peppol.seatid from the application.properties file
