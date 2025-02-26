@@ -26,4 +26,4 @@ RUN mvn clean package -DskipTests
 FROM eclipse-temurin:17-jdk-alpine
 VOLUME /tmp
 COPY --from=build /workspace/app/target/*.jar app.jar
-ENTRYPOINT ["java", "-Dspring.config.location=file:/config/application.properties", "-jar", "/app.jar"]
+ENTRYPOINT ["java","-jar","/app.jar"]

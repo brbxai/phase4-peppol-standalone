@@ -29,6 +29,10 @@ public class Phase4PeppolStandaloneApplication
 {
   public static void main (final String [] args)
   {
+    // Log the application.properties file location
+    System.out.println("Loading application.properties from: " + System.getProperty("spring.config.location"));
+    // Log the current peppol.seatid from the application.properties file
+    System.out.println("Current peppol.seatid: " + APConfig.getMyPeppolSeatID());
     SpringApplication.run (Phase4PeppolStandaloneApplication.class, args);
   }
 }

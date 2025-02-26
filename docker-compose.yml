@@ -24,6 +24,8 @@ services:
     volumes:
       - ./ap-config:/config
       - ./ap-generated:/generated
+    environment:
+      - SPRING_CONFIG_LOCATION=file:/config/application.properties
     labels:
       - "traefik.enable=true"
       # HTTP
