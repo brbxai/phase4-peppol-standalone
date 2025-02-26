@@ -9,3 +9,9 @@ generated/
 private-*.properties
 *.p12
 *.jks
+
+./traefik
+./ap-config
+./ap-generated
+./smp-config
+./smp-persistent

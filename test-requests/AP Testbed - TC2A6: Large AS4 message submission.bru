@@ -1,0 +1,19 @@
+meta {
+  name: AP Testbed - TC2A6: Large AS4 message submission
+  type: http
+  seq: 6
+}
+
+post {
+  url: http://localhost:8080/sendsbdh
+  body: xml
+  auth: none
+}
+
+headers {
+  X-Token: NjIh9tIx3Rgzme19mGIy
+}
+
+body:xml {
+  PERFORM_CURL_AND_REPLACE_BODY
+}
