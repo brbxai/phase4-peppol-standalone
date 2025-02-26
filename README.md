@@ -1,5 +1,8 @@
 # Standalone Peppol phase4
 
+> [!IMPORTANT]
+> For detailed instructions on how to setup this standalone Peppol phase4, please refer to the [README.brbx.md](README.brbx.md) file.
+
 This an example standalone implementation of [phase4](https://github.com/phax/phase4) for the Peppol Network.
 
 This is a demo application and NOT ready for production use (of course phase4 itself is ready for production use).
