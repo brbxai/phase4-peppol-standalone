@@ -25,7 +25,7 @@ services:
       - ./ap-config:/config
       - ./ap-generated:/generated
     environment:
-      - SPRING_CONFIG_LOCATION=/config/application.properties
+      - CATALINA_OPTS=-Dconfig.file=/config/application.properties
     labels:
       - "traefik.enable=true"
       # HTTP
