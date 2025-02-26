@@ -45,7 +45,9 @@ services:
     restart: unless-stopped
     volumes:
       - ./smp-config:/config
-      - ./smp-persistent:/home/git/conf
+      - ./smp-persistent:/var/smp/conf
+    environment:
+      - CATALINA_OPTS=-Dconfig.file=/config/application.properties
     labels:
       - "traefik.enable=true"
       # HTTP
