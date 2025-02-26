@@ -24,8 +24,6 @@ services:
     volumes:
       - ./ap-config:/config
       - ./ap-generated:/generated
-    environment:
-      - CATALINA_OPTS=-Dconfig.file=/config/application.properties
     labels:
       - "traefik.enable=true"
       # HTTP
