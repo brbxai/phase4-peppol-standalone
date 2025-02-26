@@ -43,7 +43,7 @@ services:
 
   phoss-smp:
     container_name: phoss-smp
-    build: ./smp
+    image: phelger/phoss-smp-xml:7.2.0
     restart: unless-stopped
     volumes:
       - ./smp-config:/config
