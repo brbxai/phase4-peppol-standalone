@@ -89,6 +89,7 @@ public class CustomPeppolIncomingSBDHandlerSPI implements IPhase4PeppolIncomingS
     String jsonPayload = new ObjectMapper().writeValueAsString(payloadMap);
 
     LOGGER.info("Received document from " + senderId + " to " + receiverId + " with docTypeId " + docTypeId + " and processId " + processId + " and countryC1 " + countryC1);
+    LOGGER.info("About to send document to: " + APConfig.getRecommandApiEndpoint() + "/api/internal/receiveDocument");
 
     // Send to endpoint
     try {
