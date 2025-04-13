@@ -48,6 +48,7 @@ import java.net.http.HttpRequest.BodyPublishers;
 import java.util.HashMap;
 import java.util.Map;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.helger.xml.serialize.write.XMLWriter;
 
 /**
  * This is a way of handling incoming Peppol messages
@@ -75,7 +76,7 @@ public class CustomPeppolIncomingSBDHandlerSPI implements IPhase4PeppolIncomingS
     String docTypeId = aPeppolSBD.getDocumentTypeAsIdentifier().getURIEncoded();
     String processId = aPeppolSBD.getProcessAsIdentifier().getURIEncoded();
     String countryC1 = aPeppolSBD.getCountryC1();
-    String body = Objects.requireNonNull(aPeppolSBD.getBusinessMessage()).toString();
+    String body = XMLWriter.getNodeAsString(aPeppolSBD.getBusinessMessage());
 
     // Create JSON payload using Jackson
     Map<String, String> payloadMap = new HashMap<>();
@@ -89,7 +90,7 @@ public class CustomPeppolIncomingSBDHandlerSPI implements IPhase4PeppolIncomingS
     String jsonPayload = new ObjectMapper().writeValueAsString(payloadMap);
 
     LOGGER.info("Received document from " + senderId + " to " + receiverId + " with docTypeId " + docTypeId + " and processId " + processId + " and countryC1 " + countryC1);
-    LOGGER.info("About to send document to: " + APConfig.getRecommandApiEndpoint() + "/api/internal/receiveDocument");
+    LOGGER.info("About to send document to: " + APConfig.getRecommandApiEndpoint() + "/api/peppol/internal/receiveDocument");
 
     // Send to endpoint
     try {
