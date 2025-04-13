@@ -80,6 +80,14 @@ Edit `docker-compose.yml` and replace the following domains with your own:
    - Certificate details (point to `cert-ap.jks` in your configuration)
    - Network settings
    - Storage locations
+   - Recommand API settings:
+     ```properties
+     # Internal token for document receiving endpoint
+     recommand.api.internal.token=your-token-here
+     
+     # Recommand API base endpoint (without the API path)
+     recommand.api.endpoint=https://peppol.recommand.com
+     ```
 
 ### 4. SMP Configuration
 

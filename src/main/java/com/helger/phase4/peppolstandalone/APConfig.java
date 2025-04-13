@@ -63,4 +63,16 @@ public final class APConfig
   {
     return _getConfig ().getAsString ("phase4.api.requiredtoken");
   }
+
+  @Nullable
+  public static String getRecommandApiInternalToken ()
+  {
+    return _getConfig ().getAsString ("recommand.api.internal.token");
+  }
+
+  @Nullable
+  public static String getRecommandApiEndpoint ()
+  {
+    return _getConfig ().getAsString ("recommand.api.endpoint");
+  }
 }

@@ -39,6 +39,15 @@ import com.helger.phase4.peppol.servlet.IPhase4PeppolIncomingSBDHandlerSPI;
 import com.helger.phase4.peppol.servlet.Phase4PeppolServletMessageProcessorSPI;
 import com.helger.phase4.peppolstandalone.APConfig;
 
+import java.util.Objects;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.net.http.HttpRequest.BodyPublishers;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+
 /**
  * This is a way of handling incoming Peppol messages
  *
@@ -60,22 +69,46 @@ public class CustomPeppolIncomingSBDHandlerSPI implements IPhase4PeppolIncomingS
   {
     final String sMyPeppolSeatID = APConfig.getMyPeppolSeatID ();
 
-    // Example code snippets how to get data
-    LOGGER.info ("Received a new Peppol Message");
-    LOGGER.info ("  C1 = " + aPeppolSBD.getSenderAsIdentifier ().getURIEncoded ());
-    LOGGER.info ("  C2 = " + PeppolCertificateHelper.getSubjectCN (aIncomingState.getSigningCertificate ()));
-    LOGGER.info ("  C3 = " + sMyPeppolSeatID);
-    LOGGER.info ("  C4 = " + aPeppolSBD.getReceiverAsIdentifier ().getURIEncoded ());
-    LOGGER.info ("  DocType = " + aPeppolSBD.getDocumentTypeAsIdentifier ().getURIEncoded ());
-    LOGGER.info ("  Process = " + aPeppolSBD.getProcessAsIdentifier ().getURIEncoded ());
-    LOGGER.info ("  CountryC1 = " + aPeppolSBD.getCountryC1 ());
+    String senderId = aPeppolSBD.getSenderAsIdentifier().getURIEncoded();
+    String receiverId = aPeppolSBD.getReceiverAsIdentifier().getURIEncoded();
+    String docTypeId = aPeppolSBD.getDocumentTypeAsIdentifier().getURIEncoded();
+    String processId = aPeppolSBD.getProcessAsIdentifier().getURIEncoded();
+    String countryC1 = aPeppolSBD.getCountryC1();
+    String body = Objects.requireNonNull(aPeppolSBD.getBusinessMessageAsTextContent()).toString();
 
-    // TODO add your code here
-    // E.g. write to disk, write to S3, write to database, write to queue...
-    LOGGER.error ("You need to implement handleIncomingSBD to deal with incoming messages");
+    // Create JSON payload
+    JsonObject payload = new JsonObject();
+    payload.addProperty("senderId", senderId);
+    payload.addProperty("receiverId", receiverId);
+    payload.addProperty("docTypeId", docTypeId);
+    payload.addProperty("processId", processId);
+    payload.addProperty("countryC1", countryC1);
+    payload.addProperty("body", body);
 
-    // In case there is an error, throw any Exception -> will lead to an AS4
-    // Error Message to the sender
+    // Send to endpoint
+    try {
+      HttpClient client = HttpClient.newHttpClient();
+      HttpRequest request = HttpRequest.newBuilder()
+          .uri(URI.create(APConfig.getRecommandApiEndpoint() + "/api/internal/receiveDocument"))
+          .header("Content-Type", "application/json")
+          .header("X-Internal-Token", APConfig.getRecommandApiInternalToken())
+          .POST(BodyPublishers.ofString(new Gson().toJson(payload)))
+          .build();
+
+      HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+      
+      if (response.statusCode() != 200) {
+        LOGGER.error("Failed to send document to endpoint. Status code: " + response.statusCode());
+        throw new Exception("Failed to process document");
+      }
+      
+      LOGGER.info("Successfully sent document to endpoint");
+    } catch (Exception e) {
+      // In case there is an error, throw any Exception -> will lead to an AS4
+      // Error Message to the sender
+      LOGGER.error("Error sending document to endpoint", e);
+      throw e;
+    }
 
     // Last action in this method
     new Thread ( () -> {
