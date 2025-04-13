@@ -75,7 +75,7 @@ public class CustomPeppolIncomingSBDHandlerSPI implements IPhase4PeppolIncomingS
     String docTypeId = aPeppolSBD.getDocumentTypeAsIdentifier().getURIEncoded();
     String processId = aPeppolSBD.getProcessAsIdentifier().getURIEncoded();
     String countryC1 = aPeppolSBD.getCountryC1();
-    String body = Objects.requireNonNull(aPeppolSBD.getBusinessMessageAsTextContent()).toString();
+    String body = Objects.requireNonNull(aPeppolSBD.getBusinessMessage()).toString();
 
     // Create JSON payload using Jackson
     Map<String, String> payloadMap = new HashMap<>();
