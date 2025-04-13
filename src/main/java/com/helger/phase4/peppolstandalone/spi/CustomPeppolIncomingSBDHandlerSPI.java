@@ -95,7 +95,7 @@ public class CustomPeppolIncomingSBDHandlerSPI implements IPhase4PeppolIncomingS
     try {
       HttpClient client = HttpClient.newHttpClient();
       HttpRequest request = HttpRequest.newBuilder()
-          .uri(URI.create(APConfig.getRecommandApiEndpoint() + "/api/internal/receiveDocument"))
+          .uri(URI.create(APConfig.getRecommandApiEndpoint() + "/api/peppol/internal/receiveDocument"))
           .header("Content-Type", "application/json")
           .header("X-Internal-Token", APConfig.getRecommandApiInternalToken())
           .POST(BodyPublishers.ofString(jsonPayload))
