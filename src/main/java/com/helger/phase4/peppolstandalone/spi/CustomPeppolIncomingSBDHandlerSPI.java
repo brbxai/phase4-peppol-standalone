@@ -45,8 +45,9 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.net.http.HttpRequest.BodyPublishers;
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
+import java.util.HashMap;
+import java.util.Map;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * This is a way of handling incoming Peppol messages
@@ -76,14 +77,16 @@ public class CustomPeppolIncomingSBDHandlerSPI implements IPhase4PeppolIncomingS
     String countryC1 = aPeppolSBD.getCountryC1();
     String body = Objects.requireNonNull(aPeppolSBD.getBusinessMessageAsTextContent()).toString();
 
-    // Create JSON payload
-    JsonObject payload = new JsonObject();
-    payload.addProperty("senderId", senderId);
-    payload.addProperty("receiverId", receiverId);
-    payload.addProperty("docTypeId", docTypeId);
-    payload.addProperty("processId", processId);
-    payload.addProperty("countryC1", countryC1);
-    payload.addProperty("body", body);
+    // Create JSON payload using Jackson
+    Map<String, String> payloadMap = new HashMap<>();
+    payloadMap.put("senderId", senderId);
+    payloadMap.put("receiverId", receiverId);
+    payloadMap.put("docTypeId", docTypeId);
+    payloadMap.put("processId", processId);
+    payloadMap.put("countryC1", countryC1);
+    payloadMap.put("body", body);
+
+    String jsonPayload = new ObjectMapper().writeValueAsString(payloadMap);
 
     // Send to endpoint
     try {
@@ -92,7 +95,7 @@ public class CustomPeppolIncomingSBDHandlerSPI implements IPhase4PeppolIncomingS
           .uri(URI.create(APConfig.getRecommandApiEndpoint() + "/api/internal/receiveDocument"))
           .header("Content-Type", "application/json")
           .header("X-Internal-Token", APConfig.getRecommandApiInternalToken())
-          .POST(BodyPublishers.ofString(new Gson().toJson(payload)))
+          .POST(BodyPublishers.ofString(jsonPayload))
           .build();
 
       HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
