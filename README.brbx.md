@@ -86,7 +86,7 @@ Edit `docker-compose.yml` and replace the following domains with your own:
      recommand.api.internal.token=your-token-here
      
      # Recommand API base endpoint (without the API path)
-     recommand.api.endpoint=https://peppol.recommand.com
+     recommand.api.endpoint=https://peppol.recommand.be
      ```
 
 ### 4. SMP Configuration
