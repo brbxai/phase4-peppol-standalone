@@ -19,15 +19,16 @@ package com.helger.phase4.peppolstandalone.servlet;
 import java.io.File;
 import java.security.KeyStore;
 import java.security.cert.X509Certificate;
+import java.time.YearMonth;
 
 import javax.annotation.Nonnull;
 
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.slf4j.bridge.SLF4JBridgeHandler;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.scheduling.annotation.Scheduled;
 
 import com.helger.commons.debug.GlobalDebug;
 import com.helger.commons.exception.InitializationException;
@@ -36,10 +37,10 @@ import com.helger.commons.state.ETriState;
 import com.helger.commons.string.StringHelper;
 import com.helger.commons.url.URLHelper;
 import com.helger.httpclient.HttpDebugger;
+import com.helger.peppol.reporting.api.backend.IPeppolReportingBackendSPI;
+import com.helger.peppol.reporting.api.backend.PeppolReportingBackend;
+import com.helger.peppol.security.PeppolTrustedCA;
 import com.helger.peppol.servicedomain.EPeppolNetwork;
-import com.helger.peppol.utils.EPeppolCertificateCheckResult;
-import com.helger.peppol.utils.PeppolCAChecker;
-import com.helger.peppol.utils.PeppolCertificateChecker;
 import com.helger.phase4.config.AS4Configuration;
 import com.helger.phase4.crypto.AS4CryptoFactoryConfiguration;
 import com.helger.phase4.crypto.AS4CryptoFactoryInMemoryKeyStore;
@@ -49,13 +50,17 @@ import com.helger.phase4.dump.AS4IncomingDumperFileBased;
 import com.helger.phase4.dump.AS4OutgoingDumperFileBased;
 import com.helger.phase4.incoming.AS4ServerInitializer;
 import com.helger.phase4.incoming.mgr.AS4ProfileSelector;
+import com.helger.phase4.logging.Phase4LoggerFactory;
 import com.helger.phase4.mgr.MetaAS4Manager;
 import com.helger.phase4.peppol.servlet.Phase4PeppolDefaultReceiverConfiguration;
 import com.helger.phase4.peppolstandalone.APConfig;
+import com.helger.phase4.peppolstandalone.reporting.AppReportingHelper;
 import com.helger.phase4.profile.peppol.AS4PeppolProfileRegistarSPI;
 import com.helger.phase4.profile.peppol.PeppolCRLDownloader;
 import com.helger.phase4.profile.peppol.Phase4PeppolHttpClientSettings;
 import com.helger.photon.io.WebFileIO;
+import com.helger.security.certificate.ECertificateCheckResult;
+import com.helger.security.certificate.TrustedCAChecker;
 import com.helger.servlet.ServletHelper;
 import com.helger.smpclient.peppol.SMPClientReadOnly;
 import com.helger.web.scope.mgr.WebScopeManager;
@@ -68,11 +73,10 @@ import jakarta.servlet.ServletContext;
 @Configuration
 public class ServletConfig
 {
-  private static final Logger LOGGER = LoggerFactory.getLogger (ServletConfig.class);
+  private static final Logger LOGGER = Phase4LoggerFactory.getLogger (ServletConfig.class);
 
   /**
-   * This method is a placeholder for retrieving a custom
-   * {@link IAS4CryptoFactory}.
+   * This method is a placeholder for retrieving a custom {@link IAS4CryptoFactory}.
    *
    * @return the {@link IAS4CryptoFactory} to use. May not be <code>null</code>.
    */
@@ -125,8 +129,8 @@ public class ServletConfig
     HttpDebugger.setEnabled (false);
 
     // Sanity check
-    if (CommandMap.getDefaultCommandMap ()
-                  .createDataContentHandler (CMimeType.MULTIPART_RELATED.getAsString ()) == null)
+    if (CommandMap.getDefaultCommandMap ().createDataContentHandler (CMimeType.MULTIPART_RELATED.getAsString ()) ==
+        null)
     {
       throw new IllegalStateException ("No DataContentHandler for MIME Type '" +
                                        CMimeType.MULTIPART_RELATED.getAsString () +
@@ -173,7 +177,7 @@ public class ServletConfig
     // resources, it can be configured here
     {
       final Phase4PeppolHttpClientSettings aHCS = new Phase4PeppolHttpClientSettings ();
-      // TODO eventually configure an outbound proxy here as well
+      // TODO eventually configure an outbound HTTP proxy here as well
       PeppolCRLDownloader.setAsDefaultCRLCache (aHCS);
     }
 
@@ -191,23 +195,23 @@ public class ServletConfig
       throw new InitializationException ("Failed to load configured AS4 private key - fix the configuration");
     LOGGER.info ("Successfully loaded configured AS4 private key from the crypto factory");
 
-    // TODO configure the stage correctly
+    // Configure the stage correctly
     final EPeppolNetwork eStage = APConfig.getPeppolStage ();
 
     final X509Certificate aAPCert = (X509Certificate) aPKE.getCertificate ();
 
     // Note: For eB2B you want to check against the eB2B CA instead
-    final PeppolCAChecker aAPCAChecker = eStage.isProduction () ? PeppolCertificateChecker.peppolProductionAP ()
-                                                                : PeppolCertificateChecker.peppolTestAP ();
+    final TrustedCAChecker aAPCAChecker = eStage.isProduction () ? PeppolTrustedCA.peppolProductionAP ()
+                                                                 : PeppolTrustedCA.peppolTestAP ();
 
     // Check the configured Peppol AP certificate
     // * No caching
     // * Use global certificate check mode
-    final EPeppolCertificateCheckResult eCheckResult = aAPCAChecker.checkCertificate (aAPCert,
-                                                                                      MetaAS4Manager.getTimestampMgr ()
-                                                                                                    .getCurrentDateTime (),
-                                                                                      ETriState.FALSE,
-                                                                                      null);
+    final ECertificateCheckResult eCheckResult = aAPCAChecker.checkCertificate (aAPCert,
+                                                                                MetaAS4Manager.getTimestampMgr ()
+                                                                                              .getCurrentDateTime (),
+                                                                                ETriState.FALSE,
+                                                                                null);
     if (eCheckResult.isInvalid ())
     {
       // TODO Change from "true" to "false" once you have a Peppol
@@ -221,7 +225,7 @@ public class ServletConfig
       }
     }
     else
-      LOGGER.info ("Sucessfully checked that the provided Peppol AP certificate is valid.");
+      LOGGER.info ("Successfully checked that the provided Peppol AP certificate is valid.");
 
     // Must be set independent on the enabled/disable status
     // This must be changed for eB2B
@@ -237,7 +241,6 @@ public class ServletConfig
       // our AP
       Phase4PeppolDefaultReceiverConfiguration.setReceiverCheckEnabled (true);
       Phase4PeppolDefaultReceiverConfiguration.setSMPClient (new SMPClientReadOnly (URLHelper.getAsURI (sSMPURL)));
-      Phase4PeppolDefaultReceiverConfiguration.setWildcardSelectionMode (Phase4PeppolDefaultReceiverConfiguration.DEFAULT_WILDCARD_SELECTION_MODE);
       Phase4PeppolDefaultReceiverConfiguration.setAS4EndpointURL (sAPURL);
       Phase4PeppolDefaultReceiverConfiguration.setAPCertificate (aAPCert);
       LOGGER.info ("phase4 Peppol receiver checks are enabled");
@@ -247,11 +250,29 @@ public class ServletConfig
       Phase4PeppolDefaultReceiverConfiguration.setReceiverCheckEnabled (false);
       LOGGER.warn ("phase4 Peppol receiver checks are disabled");
     }
+
+    // Initialize the Reporting Backend only once
+    if (PeppolReportingBackend.getBackendService ().initBackend (APConfig.getConfig ()).isFailure ())
+      throw new InitializationException ("Failed to init Peppol Reporting Backend Service");
+  }
+
+  // At 05:00 AM, on day 2 of the month
+  @Scheduled (cron = "0 0 5 2 * *")
+  public void sendPeppolReportingMessages ()
+  {
+    if (APConfig.isSchedulePeppolReporting ())
+    {
+      LOGGER.info ("Running scheduled creation and sending of Peppol Reporting messages");
+      // Use the previous month
+      final YearMonth aYearMonth = YearMonth.now ().minusMonths (1);
+      AppReportingHelper.createAndSendPeppolReports (aYearMonth);
+    }
+    else
+      LOGGER.warn ("Creating and sending Peppol Reports is disabled in the configuration");
   }
 
   /**
-   * Special class that is only present to have a graceful shutdown. The the
-   * bean method below.
+   * Special class that is only present to have a graceful shutdown. The the bean method below.
    *
    * @author Philip Helger
    */
@@ -262,6 +283,11 @@ public class ServletConfig
     {
       if (WebScopeManager.isGlobalScopePresent ())
       {
+        // Shutdown the Peppol Reporting Backend service, if it was initialized
+        final IPeppolReportingBackendSPI aPRBS = PeppolReportingBackend.getBackendService ();
+        if (aPRBS != null && aPRBS.isInitialized ())
+          aPRBS.shutdownBackend ();
+
         AS4ServerInitializer.shutdownAS4Server ();
         WebFileIO.resetPaths ();
         WebScopeManager.onGlobalEnd ();

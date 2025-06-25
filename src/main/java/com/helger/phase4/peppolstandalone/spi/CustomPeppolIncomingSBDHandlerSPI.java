@@ -19,7 +19,6 @@ package com.helger.phase4.peppolstandalone.spi;
 import javax.annotation.Nonnull;
 
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.unece.cefact.namespaces.sbdh.StandardBusinessDocument;
 
 import com.helger.commons.annotation.IsSPIImplementation;
@@ -29,15 +28,15 @@ import com.helger.peppol.reporting.api.PeppolReportingItem;
 import com.helger.peppol.reporting.api.backend.PeppolReportingBackend;
 import com.helger.peppol.reporting.api.backend.PeppolReportingBackendException;
 import com.helger.peppol.sbdh.PeppolSBDHData;
-import com.helger.peppol.utils.PeppolCertificateHelper;
-import com.helger.phase4.config.AS4Configuration;
 import com.helger.phase4.ebms3header.Ebms3Error;
 import com.helger.phase4.ebms3header.Ebms3UserMessage;
 import com.helger.phase4.incoming.IAS4IncomingMessageMetadata;
 import com.helger.phase4.incoming.IAS4IncomingMessageState;
+import com.helger.phase4.logging.Phase4LoggerFactory;
 import com.helger.phase4.peppol.servlet.IPhase4PeppolIncomingSBDHandlerSPI;
 import com.helger.phase4.peppol.servlet.Phase4PeppolServletMessageProcessorSPI;
 import com.helger.phase4.peppolstandalone.APConfig;
+import com.helger.security.certificate.CertificateHelper;
 
 import java.util.Objects;
 import java.net.URI;
@@ -58,7 +57,7 @@ import com.helger.xml.serialize.write.XMLWriter;
 @IsSPIImplementation
 public class CustomPeppolIncomingSBDHandlerSPI implements IPhase4PeppolIncomingSBDHandlerSPI
 {
-  private static final Logger LOGGER = LoggerFactory.getLogger (CustomPeppolIncomingSBDHandlerSPI.class);
+  private static final Logger LOGGER = Phase4LoggerFactory.getLogger (CustomPeppolIncomingSBDHandlerSPI.class);
 
   public void handleIncomingSBD (@Nonnull final IAS4IncomingMessageMetadata aMessageMetadata,
                                  @Nonnull final HttpHeaderMap aHeaders,
@@ -143,7 +142,7 @@ public class CustomPeppolIncomingSBDHandlerSPI implements IPhase4PeppolIncomingS
                                                                                                                                          sC3ID,
                                                                                                                                          sC4CountryCode,
                                                                                                                                          sEndUserID);
-          PeppolReportingBackend.withBackendDo (AS4Configuration.getConfig (),
+          PeppolReportingBackend.withBackendDo (APConfig.getConfig (),
                                                 aBackend -> aBackend.storeReportingItem (aReportingItem));
         }
         catch (final PeppolReportingBackendException ex)

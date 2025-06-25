@@ -14,25 +14,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.helger.phase4.peppolstandalone;
+package com.helger.phase4.peppolstandalone.controller;
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
 /**
- * This is the application entrypoint.
+ * REST Controller exception mapping to HTTP 403 (Forbidden)
  *
  * @author Philip Helger
  */
-@SpringBootApplication
-@EnableScheduling
-public class Phase4PeppolStandaloneApplication
+@ResponseStatus (HttpStatus.FORBIDDEN)
+public class HttpForbiddenException extends RuntimeException
 {
-  public static void main (final String [] args)
+  public HttpForbiddenException ()
+  {}
+
+  public HttpForbiddenException (final String sMsg)
   {
-    // Log the current peppol.seatid from the application.properties file
-    System.out.println("Current peppol.seatid: " + APConfig.getMyPeppolSeatID());
-    SpringApplication.run (Phase4PeppolStandaloneApplication.class, args);
+    super (sMsg);
   }
 }
