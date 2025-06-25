@@ -84,12 +84,12 @@ public final class APConfig
   @Nullable
   public static String getRecommandApiInternalToken ()
   {
-    return _getConfig ().getAsString ("recommand.api.internal.token");
+    return getConfig ().getAsString ("recommand.api.internal.token");
   }
 
   @Nullable
   public static String getRecommandApiEndpoint ()
   {
-    return _getConfig ().getAsString ("recommand.api.endpoint");
+    return getConfig ().getAsString ("recommand.api.endpoint");
   }
 }
