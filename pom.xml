@@ -24,7 +24,7 @@
   <parent>
     <groupId>com.helger.phase4</groupId>
     <artifactId>phase4-parent-pom</artifactId>
-    <version>3.0.5</version>
+    <version>3.2.0</version>
   </parent>
   <artifactId>phase4-peppol-standalone</artifactId>
   <name>phase4-peppol-standalone</name>
@@ -44,8 +44,9 @@
   <!--
   <repositories>
     <repository>
-      <id>central-snapshots</id>
-      <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+      <name>Central Portal Snapshots</name>
+      <id>central-portal-snapshots</id>
+      <url>https://central.sonatype.com/repository/maven-snapshots/</url>
       <releases>
         <enabled>false</enabled>
       </releases>
@@ -57,8 +58,9 @@
   -->
 
   <properties>
-    <spring-boot.version>3.4.2</spring-boot.version>
-    <junit5.version>5.11.4</junit5.version>
+    <peppol-ap-support.version>1.0.2</peppol-ap-support.version>
+    <peppol-reporting.version>3.1.0</peppol-reporting.version>
+    <spring-boot.version>3.5.0</spring-boot.version>
   </properties>
 
   <!-- Include here to not bloat the global scope -->
@@ -112,6 +114,22 @@
       <groupId>com.helger.phase4</groupId>
       <artifactId>phase4-peppol-client</artifactId>
     </dependency>
+    <dependency>
+      <groupId>com.helger.peppol</groupId>
+      <artifactId>peppol-reporting</artifactId>
+      <version>${peppol-reporting.version}</version>
+    </dependency>
+    <!-- TODO Choose any other backend implementation -->
+    <dependency>
+      <groupId>com.helger.peppol</groupId>
+      <artifactId>peppol-reporting-backend-inmemory</artifactId>
+      <version>${peppol-reporting.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.helger.peppol</groupId>
+      <artifactId>peppol-reporting-support</artifactId>
+      <version>${peppol-ap-support.version}</version>
+    </dependency>
 
     <dependency>
       <groupId>com.sun.xml.bind</groupId>
@@ -125,14 +143,12 @@
     </dependency>
     <dependency>
       <groupId>org.junit.jupiter</groupId>
-      <artifactId>junit-jupiter-api</artifactId><!--$NO-MVN-MAN-VER$-->
-      <version>${junit5.version}</version>  <!-- transitive version is 5.10.3 :( -->
+      <artifactId>junit-jupiter-api</artifactId>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.junit.jupiter</groupId>
-      <artifactId>junit-jupiter-engine</artifactId><!--$NO-MVN-MAN-VER$-->
-      <version>${junit5.version}</version>  <!-- transitive version is 5.10.9 :( -->
+      <artifactId>junit-jupiter-engine</artifactId>
       <scope>test</scope>
     </dependency>
   </dependencies>

@@ -17,14 +17,11 @@
 package com.helger.phase4.peppolstandalone.controller;
 
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.helger.commons.io.stream.NonBlockingByteArrayInputStream;
@@ -32,29 +29,25 @@ import com.helger.commons.string.StringHelper;
 import com.helger.peppol.sbdh.PeppolSBDHData;
 import com.helger.peppol.sbdh.PeppolSBDHDataReadException;
 import com.helger.peppol.sbdh.PeppolSBDHDataReader;
+import com.helger.peppol.security.PeppolTrustedCA;
 import com.helger.peppol.servicedomain.EPeppolNetwork;
 import com.helger.peppol.sml.ESML;
-import com.helger.peppol.utils.PeppolCAChecker;
-import com.helger.peppol.utils.PeppolCertificateChecker;
 import com.helger.peppolid.factory.PeppolIdentifierFactory;
+import com.helger.phase4.logging.Phase4LoggerFactory;
 import com.helger.phase4.peppol.Phase4PeppolSendingReport;
 import com.helger.phase4.peppolstandalone.APConfig;
+import com.helger.security.certificate.TrustedCAChecker;
 
 /**
- * This is the primary REST controller for the APIs to send messages over
- * Peppol.
+ * This is the primary REST controller for the APIs to send messages over Peppol.
  *
  * @author Philip Helger
  */
 @RestController
 public class PeppolSenderController
 {
-  @ResponseStatus (HttpStatus.FORBIDDEN)
-  public static class ForbiddenException extends RuntimeException
-  {}
-
-  private static final Logger LOGGER = LoggerFactory.getLogger (PeppolSenderController.class);
-  private static final String HEADER_X_TOKEN = "X-Token";
+  static final String HEADER_X_TOKEN = "X-Token";
+  private static final Logger LOGGER = Phase4LoggerFactory.getLogger (PeppolSenderController.class);
 
   @PostMapping (path = "/sendas4/{senderId}/{receiverId}/{docTypeId}/{processId}/{countryC1}",
                 produces = MediaType.APPLICATION_JSON_VALUE)
@@ -69,18 +62,18 @@ public class PeppolSenderController
     if (StringHelper.hasNoText (xtoken))
     {
       LOGGER.error ("The specific token header is missing");
-      throw new ForbiddenException ();
+      throw new HttpForbiddenException ();
     }
     if (!xtoken.equals (APConfig.getPhase4ApiRequiredToken ()))
     {
       LOGGER.error ("The specified token value does not match the configured required token");
-      throw new ForbiddenException ();
+      throw new HttpForbiddenException ();
     }
 
     final EPeppolNetwork eStage = APConfig.getPeppolStage ();
     final ESML eSML = eStage.isProduction () ? ESML.DIGIT_PRODUCTION : ESML.DIGIT_TEST;
-    final PeppolCAChecker aAPCA = eStage.isProduction () ? PeppolCertificateChecker.peppolProductionAP ()
-                                                         : PeppolCertificateChecker.peppolTestAP ();
+    final TrustedCAChecker aAPCA = eStage.isProduction () ? PeppolTrustedCA.peppolProductionAP () : PeppolTrustedCA
+                                                                                                                   .peppolTestAP ();
     LOGGER.info ("Trying to send Peppol " +
                  eStage.name () +
                  " message from '" +
@@ -114,18 +107,18 @@ public class PeppolSenderController
     if (StringHelper.hasNoText (xtoken))
     {
       LOGGER.error ("The specific token header is missing");
-      throw new ForbiddenException ();
+      throw new HttpForbiddenException ();
     }
     if (!xtoken.equals (APConfig.getPhase4ApiRequiredToken ()))
     {
       LOGGER.error ("The specified token value does not match the configured required token");
-      throw new ForbiddenException ();
+      throw new HttpForbiddenException ();
     }
 
     final EPeppolNetwork eStage = APConfig.getPeppolStage ();
     final ESML eSML = eStage.isProduction () ? ESML.DIGIT_PRODUCTION : ESML.DIGIT_TEST;
-    final PeppolCAChecker aAPCA = eStage.isProduction () ? PeppolCertificateChecker.peppolProductionAP ()
-                                                         : PeppolCertificateChecker.peppolTestAP ();
+    final TrustedCAChecker aAPCA = eStage.isProduction () ? PeppolTrustedCA.peppolProductionAP () : PeppolTrustedCA
+                                                                                                                   .peppolTestAP ();
     final Phase4PeppolSendingReport aSendingReport = new Phase4PeppolSendingReport (eSML);
 
     final PeppolSBDHData aData;
@@ -155,7 +148,9 @@ public class PeppolSenderController
     final String sDocTypeID = aData.getDocumentTypeAsIdentifier ().getURIEncoded ();
     final String sProcessID = aData.getProcessAsIdentifier ().getURIEncoded ();
     final String sCountryCodeC1 = aData.getCountryC1 ();
-    LOGGER.info ("Trying to send Peppol Test SBDH message from '" +
+    LOGGER.info ("Trying to send Peppol " +
+                 eStage.name () +
+                 " SBDH message from '" +
                  sSenderID +
                  "' to '" +
                  sReceiverID +
