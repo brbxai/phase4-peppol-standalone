@@ -133,7 +133,8 @@ Edit `docker-compose.yml` and replace the following domains with your own:
 To update the services:
 ```bash
 docker compose pull
-docker compose up -d --build
+docker compose build --no-cache phase4
+docker compose up -d
 ```
 
 ### Backup
