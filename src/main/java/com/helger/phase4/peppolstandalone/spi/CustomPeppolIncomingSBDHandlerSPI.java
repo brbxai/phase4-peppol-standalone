@@ -124,32 +124,41 @@ public class CustomPeppolIncomingSBDHandlerSPI implements IPhase4PeppolIncomingS
       // Note: this is a separate thread so that it does not block the sending
       // of the positive receipt message
 
-      // TODO Peppol Reporting - enable if possible to be done in here
-      if (false)
-        try
-        {
-          LOGGER.info ("Creating Peppol Reporting Item and storing it");
+      // Peppol Reporting - enabled for incoming messages
+      try
+      {
+        LOGGER.info ("Creating Peppol Reporting Item and storing it");
 
-          // TODO determine correct values for the next three fields
-          final String sC3ID = sMyPeppolSeatID;
-          final String sC4CountryCode = "AT";
-          final String sEndUserID = "EndUserID";
+        // Determine correct values for the required fields
+        final String sC3ID = sMyPeppolSeatID;
+        final String sC4CountryCode = APConfig.getMyPeppolCountryCode();
+        
+        // Determine end user ID - in most cases, this would be the receiver's participant ID
+        // since this is an incoming message handler, the receiver is the end user
+        final String sEndUserID = aPeppolSBD.getReceiverAsIdentifier().getURIEncoded();
 
-          // Create the reporting item
-          final PeppolReportingItem aReportingItem = Phase4PeppolServletMessageProcessorSPI.createPeppolReportingItemForReceivedMessage (aUserMessage,
-                                                                                                                                         aPeppolSBD,
-                                                                                                                                         aIncomingState,
-                                                                                                                                         sC3ID,
-                                                                                                                                         sC4CountryCode,
-                                                                                                                                         sEndUserID);
-          PeppolReportingBackend.withBackendDo (APConfig.getConfig (),
-                                                aBackend -> aBackend.storeReportingItem (aReportingItem));
-        }
-        catch (final PeppolReportingBackendException ex)
-        {
-          LOGGER.error ("Failed to store Peppol Reporting Item", ex);
-          // TODO improve error handling
-        }
+        // Create the reporting item
+        final PeppolReportingItem aReportingItem = Phase4PeppolServletMessageProcessorSPI.createPeppolReportingItemForReceivedMessage (aUserMessage,
+                                                                                                                                       aPeppolSBD,
+                                                                                                                                       aIncomingState,
+                                                                                                                                       sC3ID,
+                                                                                                                                       sC4CountryCode,
+                                                                                                                                       sEndUserID);
+        PeppolReportingBackend.withBackendDo (APConfig.getConfig (),
+                                              aBackend -> aBackend.storeReportingItem (aReportingItem));
+        
+        LOGGER.info ("Successfully stored Peppol Reporting Item for end user: " + sEndUserID);
+      }
+      catch (final PeppolReportingBackendException ex)
+      {
+        LOGGER.error ("Failed to store Peppol Reporting Item", ex);
+        // Don't throw the exception as this is in a separate thread and shouldn't affect the main message processing
+      }
+      catch (final Exception ex)
+      {
+        LOGGER.error ("Unexpected error during Peppol Reporting", ex);
+        // Don't throw the exception as this is in a separate thread and shouldn't affect the main message processing
+      }
     }).start ();
   }
 }

@@ -122,7 +122,7 @@
     <!-- TODO Choose any other backend implementation -->
     <dependency>
       <groupId>com.helger.peppol</groupId>
-      <artifactId>peppol-reporting-backend-inmemory</artifactId>
+      <artifactId>peppol-reporting-backend-csv</artifactId>
       <version>${peppol-reporting.version}</version>
     </dependency>
     <dependency>

@@ -208,13 +208,21 @@ public final class PeppolSender
 
       if (eResult.isSuccess ())
       {
-        // TODO determine the enduser ID of the outbound message
-        // In many simple cases, this might be the sender's participant ID
-        final String sEndUserID = "TODO";
+        // Determine the end user ID of the outbound message
+        // In most cases, this would be the sender's participant ID
+        final String sEndUserID = sSenderID;
 
-        // TODO Enable Peppol Reporting when ready
-        if (false)
+        // Enable Peppol Reporting for outbound messages
+        try
+        {
           aBuilder.createAndStorePeppolReportingItemAfterSending (sEndUserID);
+          LOGGER.info ("Successfully stored Peppol Reporting Item for outbound message with end user: " + sEndUserID);
+        }
+        catch (final Exception ex)
+        {
+          LOGGER.error ("Failed to store Peppol Reporting Item for outbound message", ex);
+          // Don't throw the exception as this shouldn't affect the main sending process
+        }
       }
 
       aSendingReport.setAS4SendingResult (eResult);
@@ -336,13 +344,21 @@ public final class PeppolSender
 
       if (eResult.isSuccess ())
       {
-        // TODO determine the enduser ID of the outbound message
-        // In many simple cases, this might be the sender's participant ID
-        final String sEndUserID = "TODO";
+        // Determine the end user ID of the outbound message
+        // In most cases, this would be the sender's participant ID from the SBDH data
+        final String sEndUserID = aData.getSenderAsIdentifier().getURIEncoded();
 
-        // TODO Enable Peppol Reporting when ready
-        if (false)
+        // Enable Peppol Reporting for outbound messages
+        try
+        {
           aBuilder.createAndStorePeppolReportingItemAfterSending (sEndUserID);
+          LOGGER.info ("Successfully stored Peppol Reporting Item for outbound message with end user: " + sEndUserID);
+        }
+        catch (final Exception ex)
+        {
+          LOGGER.error ("Failed to store Peppol Reporting Item for outbound message", ex);
+          // Don't throw the exception as this shouldn't affect the main sending process
+        }
       }
 
       aSendingReport.setAS4SendingResult (eResult);
