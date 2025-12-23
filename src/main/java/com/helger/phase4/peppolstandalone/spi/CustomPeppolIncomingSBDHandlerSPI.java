@@ -74,6 +74,7 @@ public class CustomPeppolIncomingSBDHandlerSPI implements IPhase4PeppolIncomingS
     String processId = aPeppolSBD.getProcessAsIdentifier().getURIEncoded();
     String countryC1 = aPeppolSBD.getCountryC1();
     String body = XMLWriter.getNodeAsString(aPeppolSBD.getBusinessMessage());
+    String instanceIdentifier = aPeppolSBD.getInstanceIdentifier();
     
     // Extract AS4 message metadata
     String as4MessageId = aUserMessage.getMessageInfo() != null && aUserMessage.getMessageInfo().getMessageId() != null 
@@ -93,6 +94,7 @@ public class CustomPeppolIncomingSBDHandlerSPI implements IPhase4PeppolIncomingS
     payloadMap.put("body", body);
     payloadMap.put("as4MessageId", as4MessageId);
     payloadMap.put("as4ConversationId", as4ConversationId);
+    payloadMap.put("sbdhInstanceIdentifier", instanceIdentifier);
 
     String jsonPayload = new ObjectMapper().writeValueAsString(payloadMap);
 
