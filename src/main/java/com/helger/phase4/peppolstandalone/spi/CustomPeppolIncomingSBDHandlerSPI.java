@@ -36,9 +36,7 @@ import com.helger.phase4.logging.Phase4LoggerFactory;
 import com.helger.phase4.peppol.servlet.IPhase4PeppolIncomingSBDHandlerSPI;
 import com.helger.phase4.peppol.servlet.Phase4PeppolServletMessageProcessorSPI;
 import com.helger.phase4.peppolstandalone.APConfig;
-import com.helger.security.certificate.CertificateHelper;
 
-import java.util.Objects;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -76,15 +74,25 @@ public class CustomPeppolIncomingSBDHandlerSPI implements IPhase4PeppolIncomingS
     String processId = aPeppolSBD.getProcessAsIdentifier().getURIEncoded();
     String countryC1 = aPeppolSBD.getCountryC1();
     String body = XMLWriter.getNodeAsString(aPeppolSBD.getBusinessMessage());
+    
+    // Extract AS4 message metadata
+    String as4MessageId = aUserMessage.getMessageInfo() != null && aUserMessage.getMessageInfo().getMessageId() != null 
+        ? aUserMessage.getMessageInfo().getMessageId() 
+        : null;
+    String as4ConversationId = aUserMessage.getCollaborationInfo() != null && aUserMessage.getCollaborationInfo().getConversationId() != null 
+        ? aUserMessage.getCollaborationInfo().getConversationId() 
+        : null;
 
     // Create JSON payload using Jackson
-    Map<String, String> payloadMap = new HashMap<>();
+    Map<String, Object> payloadMap = new HashMap<>();
     payloadMap.put("senderId", senderId);
     payloadMap.put("receiverId", receiverId);
     payloadMap.put("docTypeId", docTypeId);
     payloadMap.put("processId", processId);
     payloadMap.put("countryC1", countryC1);
     payloadMap.put("body", body);
+    payloadMap.put("as4MessageId", as4MessageId);
+    payloadMap.put("as4ConversationId", as4ConversationId);
 
     String jsonPayload = new ObjectMapper().writeValueAsString(payloadMap);
 
